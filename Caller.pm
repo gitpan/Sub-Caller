@@ -2,7 +2,7 @@ package Sub::Caller;
 
 require DynaLoader;
 
-our $VERSION = '0.50';
+our $VERSION = '0.60';
 our @ISA = qw(DynaLoader);
 bootstrap Sub::Caller;
 ################################
@@ -110,12 +110,12 @@ __END__
 
 =head1 NAME
 
-Sub::Caller - Add caller information to @_
+Sub::Caller - Add caller information to the end of @_.
 
 =head1 DESCRIPTION
 
 Sub::Caller provides an easy way to pass caller information to 
-all, or specified, sub-routines:
+all, or specific, sub-routines:
 
    use Sub::Caller qw(all); ## Pass to all non-anon subs
    use Sub::Caller qw(sub1 sub2); ## Only these subs
@@ -129,18 +129,63 @@ all, or specified, sub-routines:
    &Sub::Caller::addCaller('test');
 
 
-The functions must be loaded before addCaller() can be called successfully.
+The sub-routines must be loaded before addCaller() can be called successfully. If you call 
+addCaller() on the same sub-routine(s) multiple times, all calls after the first are silently 
+ignored.
 
-If you call addCaller() on the same function(s) multiple times, all calls 
-after the first are silently ignored.
+Caller information takes the form of:
+
+   {
+      package  => 'main',
+      function => 'test',
+      file     => 'test.pl',
+      line     => 7,
+   }
+
+This hash reference is added to the end of @_.
+
+=head1 EXAMPLE
+
+   #!/usr/bin/perl
+   # test.pl
+
+   use Data::Dumper;
+   use Sub::Caller('test');
+
+
+   test('a');
+
+
+   sub test {
+      ## Make sure we have @_ and it is what we expect
+      if (@_ && Sub::Caler::isCaller($_[-1])){
+         print Dumper(\@_);
+      }
+   }
+
+   __END__
+   Dumper will print:
+
+   $VAR1 = [
+             'a',
+             bless( {
+                      'function' => 'main',
+                      'file' => 'test.pl',
+                      'line' => 8,
+                      'package' => 'main'
+                    }, 'Sub::Caller' )
+           ];
 
 =head1 AUTHOR
 
 Shay Harding E<lt>sharding@ccbill.comE<gt>
 
-=head1 TODO
+=head1 CHANGES
+   2003-05-27
+      Added more tests.
+      Updated POD with a clear example of usage.
 
-Add some tests.
+=head1 TODO
 
 Would be nice to add this to anonymous functions, but alas, I haven't figured that 
 part out yet. Would probably have to dig into XS more and mess with OP code stuff.

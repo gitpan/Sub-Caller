@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
   my $pkg = 'Sub-Caller';
-  my $ver = "0.50";
+  my $ver = "0.60";
   `rm -f ../*.gz; ./build_manifest.pl; ./build_readme.pl`;
 
   open FILE, "../MANIFEST";
